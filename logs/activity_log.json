@@ -1,72 +1,72 @@
 [
   {
-    "timestamp": "2026-01-17T09:49:37.093574",
-    "cpu": 65,
+    "timestamp": "2026-01-17T13:47:30.452753",
+    "cpu": 34,
+    "memory": 35,
+    "status": "HEALTHY",
+    "message": "System checked at 2026-01-17T13:47:30.452753"
+  },
+  {
+    "timestamp": "2026-01-17T13:47:33.467781",
+    "cpu": 50,
+    "memory": 26,
+    "status": "HEALTHY",
+    "message": "System checked at 2026-01-17T13:47:33.467781"
+  },
+  {
+    "timestamp": "2026-01-17T13:47:36.484408",
+    "cpu": 58,
+    "memory": 63,
+    "status": "HEALTHY",
+    "message": "System checked at 2026-01-17T13:47:36.484408"
+  },
+  {
+    "timestamp": "2026-01-17T13:47:39.501450",
+    "cpu": 33,
     "memory": 53,
     "status": "HEALTHY",
-    "message": "System checked at 2026-01-17T09:49:37.093574"
+    "message": "System checked at 2026-01-17T13:47:39.501450"
   },
   {
-    "timestamp": "2026-01-17T09:49:40.109145",
-    "cpu": 87,
-    "memory": 36,
-    "status": "WARNING",
-    "message": "System checked at 2026-01-17T09:49:40.109145"
-  },
-  {
-    "timestamp": "2026-01-17T09:49:43.127039",
-    "cpu": 49,
-    "memory": 47,
-    "status": "HEALTHY",
-    "message": "System checked at 2026-01-17T09:49:43.127039"
-  },
-  {
-    "timestamp": "2026-01-17T09:49:46.140696",
-    "cpu": 55,
-    "memory": 32,
-    "status": "HEALTHY",
-    "message": "System checked at 2026-01-17T09:49:46.140696"
-  },
-  {
-    "timestamp": "2026-01-17T09:49:49.156494",
-    "cpu": 35,
-    "memory": 28,
-    "status": "HEALTHY",
-    "message": "System checked at 2026-01-17T09:49:49.156494"
-  },
-  {
-    "timestamp": "2026-01-17T09:49:52.170964",
-    "cpu": 72,
-    "memory": 21,
-    "status": "HEALTHY",
-    "message": "System checked at 2026-01-17T09:49:52.170964"
-  },
-  {
-    "timestamp": "2026-01-17T09:49:55.256333",
-    "cpu": 38,
-    "memory": 45,
-    "status": "HEALTHY",
-    "message": "System checked at 2026-01-17T09:49:55.256333"
-  },
-  {
-    "timestamp": "2026-01-17T09:49:58.304460",
-    "cpu": 20,
-    "memory": 32,
-    "status": "HEALTHY",
-    "message": "System checked at 2026-01-17T09:49:58.304460"
-  },
-  {
-    "timestamp": "2026-01-17T09:50:01.318434",
-    "cpu": 67,
+    "timestamp": "2026-01-17T13:47:42.519161",
+    "cpu": 75,
     "memory": 31,
     "status": "HEALTHY",
-    "message": "System checked at 2026-01-17T09:50:01.318434"
+    "message": "System checked at 2026-01-17T13:47:42.519161"
   },
   {
-    "timestamp": "2026-01-17T09:50:04.332153",
-    "cpu": 73,
-    "memory": 74,
+    "timestamp": "2026-01-17T13:47:45.534234",
+    "cpu": 40,
+    "memory": 27,
     "status": "HEALTHY",
-    "message": "System checked at 2026-01-17T09:50:04.332153"
+    "message": "System checked at 2026-01-17T13:47:45.534234"
+  },
+  {
+    "timestamp": "2026-01-17T13:47:48.549893",
+    "cpu": 52,
+    "memory": 70,
+    "status": "HEALTHY",
+    "message": "System checked at 2026-01-17T13:47:48.549893"
+  },
+  {
+    "timestamp": "2026-01-17T13:47:51.563180",
+    "cpu": 41,
+    "memory": 56,
+    "status": "HEALTHY",
+    "message": "System checked at 2026-01-17T13:47:51.563180"
+  },
+  {
+    "timestamp": "2026-01-17T13:47:54.580226",
+    "cpu": 36,
+    "memory": 39,
+    "status": "HEALTHY",
+    "message": "System checked at 2026-01-17T13:47:54.580226"
+  },
+  {
+    "timestamp": "2026-01-17T13:47:57.593205",
+    "cpu": 20,
+    "memory": 47,
+    "status": "HEALTHY",
+    "message": "System checked at 2026-01-17T13:47:57.593205"
   }
 ]

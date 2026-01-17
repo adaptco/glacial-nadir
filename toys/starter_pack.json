@@ -1,0 +1,450 @@
+{
+    "pack_id": "agentq.toy_starter_pack.v1",
+    "version": "1.0.0",
+    "toys": [
+        {
+            "toy_id": "toy.steering.v1",
+            "name": "The Steering Problem",
+            "teaches": [
+                "policy learning",
+                "credit assignment",
+                "reward shaping",
+                "failure analysis"
+            ],
+            "world": {
+                "state": {
+                    "heading_deg": 0,
+                    "track_curvature": 0.0,
+                    "grip": 0.8,
+                    "speed": 0.6,
+                    "lap_progress": 0.0,
+                    "damage": 0.0
+                },
+                "actions": [
+                    "STEER_LEFT",
+                    "STEER_RIGHT",
+                    "HOLD_LINE",
+                    "BRAKE",
+                    "ACCEL"
+                ],
+                "parameters": {
+                    "dt": 1,
+                    "max_steps": 200,
+                    "steer_delta_deg": 6,
+                    "brake_delta": 0.08,
+                    "accel_delta": 0.06,
+                    "damage_on_offtrack": 0.03
+                }
+            },
+            "transition": {
+                "type": "deterministic",
+                "rules": [
+                    "heading_deg += steer_delta_deg if action is STEER_LEFT else -steer_delta_deg if STEER_RIGHT",
+                    "speed += accel_delta if action is ACCEL else -brake_delta if action is BRAKE",
+                    "offtrack_risk = abs(heading_deg - desired_heading(track_curvature)) * (1 - grip)",
+                    "damage += damage_on_offtrack if offtrack_risk > threshold",
+                    "lap_progress += clamp(speed, 0, 1) * progress_gain(grip)"
+                ]
+            },
+            "score": {
+                "reward": [
+                    "smoothness_bonus = -abs(delta_heading_deg)",
+                    "speed_bonus = speed",
+                    "penalty = 5 * damage",
+                    "total = smoothness_bonus + speed_bonus - penalty"
+                ]
+            },
+            "agentq_hooks": {
+                "explain": [
+                    "why_action",
+                    "counterfactual_best_action",
+                    "what_state_feature_mattered"
+                ],
+                "debug_views": [
+                    "trajectory",
+                    "reward_breakdown",
+                    "failure_replay"
+                ]
+            },
+            "exercises": [
+                "Change reward shaping and observe policy collapse vs stability",
+                "Lower grip mid-run and explain adaptation",
+                "Introduce a new action 'DRIFT' and compare outcomes"
+            ]
+        },
+        {
+            "toy_id": "toy.rag_desk.v1",
+            "name": "Memory & Retrieval Desk",
+            "teaches": [
+                "RAG mechanics",
+                "embedding distance intuition",
+                "hallucination causes",
+                "grounding checks"
+            ],
+            "world": {
+                "state": {
+                    "query": "",
+                    "cards": [
+                        {
+                            "card_id": "c1",
+                            "text": "Grip decreases on cold tires; braking earlier helps stability.",
+                            "tags": [
+                                "driving",
+                                "grip"
+                            ]
+                        },
+                        {
+                            "card_id": "c2",
+                            "text": "RAG retrieves top-k items by vector similarity.",
+                            "tags": [
+                                "rag",
+                                "retrieval"
+                            ]
+                        }
+                    ],
+                    "index": {
+                        "metric": "cosine",
+                        "k": 3,
+                        "threshold": 0.22
+                    },
+                    "answer": ""
+                },
+                "actions": [
+                    "ADD_CARD",
+                    "REMOVE_CARD",
+                    "EDIT_CARD",
+                    "SET_QUERY",
+                    "RETRIEVE",
+                    "ANSWER",
+                    "RUN_GROUNDING_CHECK"
+                ],
+                "parameters": {
+                    "seed": 1337,
+                    "embedding_dim": 8,
+                    "noise": 0.0
+                }
+            },
+            "transition": {
+                "type": "seeded",
+                "rules": [
+                    "RETRIEVE computes distances(query_vec, card_vecs) and selects top-k above threshold",
+                    "ANSWER concatenates citations + generates response with constrained template",
+                    "RUN_GROUNDING_CHECK fails if answer claims facts not present in retrieved cards"
+                ]
+            },
+            "score": {
+                "metrics": [
+                    "groundedness_rate",
+                    "retrieval_precision",
+                    "abstention_quality",
+                    "hallucination_rate"
+                ]
+            },
+            "agentq_hooks": {
+                "explain": [
+                    "why_these_cards",
+                    "which_card_supported_each_claim",
+                    "what_was_missing"
+                ],
+                "debug_views": [
+                    "distance_map",
+                    "topk_trace",
+                    "claim_to_card_map"
+                ]
+            },
+            "exercises": [
+                "Force k=1 and show brittleness",
+                "Raise threshold and explain abstention",
+                "Add a misleading card and watch retrieval failure modes"
+            ]
+        },
+        {
+            "toy_id": "toy.swarm_turns.v1",
+            "name": "Turn-Based Agent Swarm",
+            "teaches": [
+                "multi-agent coordination",
+                "routing",
+                "conflict resolution",
+                "identity separation"
+            ],
+            "world": {
+                "state": {
+                    "board_size": [
+                        8,
+                        8
+                    ],
+                    "agents": [
+                        {
+                            "agent_id": "planner",
+                            "pos": [
+                                1,
+                                1
+                            ],
+                            "goal": "minimize risk"
+                        },
+                        {
+                            "agent_id": "builder",
+                            "pos": [
+                                1,
+                                2
+                            ],
+                            "goal": "maximize progress"
+                        },
+                        {
+                            "agent_id": "auditor",
+                            "pos": [
+                                2,
+                                1
+                            ],
+                            "goal": "enforce constraints"
+                        }
+                    ],
+                    "tokens": [
+                        {
+                            "token_id": "risk",
+                            "pos": [
+                                4,
+                                4
+                            ],
+                            "value": 0.7
+                        },
+                        {
+                            "token_id": "progress",
+                            "pos": [
+                                6,
+                                6
+                            ],
+                            "value": 0.8
+                        }
+                    ],
+                    "turn": 0,
+                    "conflicts": []
+                },
+                "actions": [
+                    "MOVE",
+                    "PICK",
+                    "DROP",
+                    "PROPOSE",
+                    "VETO",
+                    "COMMIT"
+                ],
+                "parameters": {
+                    "max_turns": 40,
+                    "identity_separation_threshold": 0.35
+                }
+            },
+            "transition": {
+                "type": "deterministic",
+                "rules": [
+                    "Agents act in fixed order: planner -> builder -> auditor",
+                    "PROPOSE creates an intent; VETO can block; COMMIT applies",
+                    "identity_separation is computed from overlapping goals + identical action traces; must exceed threshold"
+                ]
+            },
+            "score": {
+                "metrics": [
+                    "conflict_rate",
+                    "goal_satisfaction",
+                    "constraint_violations",
+                    "coordination_efficiency"
+                ]
+            },
+            "agentq_hooks": {
+                "explain": [
+                    "why_routing_decision",
+                    "who_disagreed_and_why",
+                    "what_constraint_fired"
+                ],
+                "debug_views": [
+                    "turn_log",
+                    "intent_graph",
+                    "identity_separation_meter"
+                ]
+            },
+            "exercises": [
+                "Add a 4th agent with similar goal and trigger identity separation failure",
+                "Change action order and show emergent behavior shifts",
+                "Introduce a 'deadline' token that pressures suboptimal commits"
+            ]
+        },
+        {
+            "toy_id": "toy.boundary_pipe.v1",
+            "name": "BoundaryPipe Runtime",
+            "teaches": [
+                "validation gates",
+                "deterministic pipelines",
+                "audit logs",
+                "replayable CI/CD cognition"
+            ],
+            "world": {
+                "state": {
+                    "node": "ORIGIN",
+                    "world_hash": "",
+                    "frame_hash": "",
+                    "delta_metrics": {},
+                    "routing": [],
+                    "token_weight_map": {},
+                    "errors": []
+                },
+                "actions": [
+                    "TICK"
+                ],
+                "parameters": {
+                    "nodes": [
+                        "ORIGIN",
+                        "INGEST",
+                        "GROUND",
+                        "MAP_PHASE",
+                        "NORMALIZE_BOUNDARIES",
+                        "ASSEMBLY_VALIDATE",
+                        "SEED_KERNEL",
+                        "RENDER_PROJECTION",
+                        "LOG_EVENT",
+                        "DONE"
+                    ],
+                    "invariants": [
+                        "never_skip_validation",
+                        "no_token_release_before_assembly_validate",
+                        "frame_requires_world_hash"
+                    ]
+                }
+            },
+            "transition": {
+                "type": "deterministic",
+                "rules": [
+                    "Each TICK advances exactly one node unless invariant fails",
+                    "If invariant fails -> node=ERROR and emit errors[]",
+                    "LOG_EVENT always appends an event with hashes + deltas + routing decisions"
+                ]
+            },
+            "score": {
+                "metrics": [
+                    "invariant_pass_rate",
+                    "replay_determinism",
+                    "mean_ticks_to_done"
+                ]
+            },
+            "agentq_hooks": {
+                "explain": [
+                    "why_gate_blocked",
+                    "what_invariant_failed",
+                    "how_to_fix_without_hiding_complexity"
+                ],
+                "debug_views": [
+                    "state_machine_view",
+                    "event_log_view",
+                    "hash_chain_view"
+                ]
+            },
+            "exercises": [
+                "Intentionally break 'frame_requires_world_hash' and show why auditability matters",
+                "Lower tick energy budget and demonstrate graceful degradation (reduce K, reduce render)",
+                "Add a new node and prove determinism via replay"
+            ]
+        },
+        {
+            "toy_id": "toy.bom_assembler.v1",
+            "name": "BOM Assembler (LEGO Validity)",
+            "teaches": [
+                "assembly constraints",
+                "identity persistence",
+                "system composition",
+                "safe mutation points (hinges)"
+            ],
+            "world": {
+                "state": {
+                    "bom": [
+                        {
+                            "part_id": "wheel_tensor",
+                            "qty": 4,
+                            "required": true
+                        },
+                        {
+                            "part_id": "track_spline",
+                            "qty": 1,
+                            "required": true
+                        },
+                        {
+                            "part_id": "camera_rig",
+                            "qty": 1,
+                            "required": false
+                        }
+                    ],
+                    "registry": {
+                        "entities": [
+                            {
+                                "entity_id": "car_A",
+                                "rig": "vantage_like",
+                                "wheels": 4
+                            },
+                            {
+                                "entity_id": "car_B",
+                                "rig": "f1_like",
+                                "wheels": 4
+                            }
+                        ],
+                        "hinges": [
+                            {
+                                "hinge_id": "HINGE:ISOMETRIC_ORTHO:v1",
+                                "binds": [
+                                    "G_iso",
+                                    "G_ortho"
+                                ]
+                            }
+                        ]
+                    },
+                    "assembly_valid": false,
+                    "notes": []
+                },
+                "actions": [
+                    "ADD_PART",
+                    "REMOVE_PART",
+                    "VALIDATE",
+                    "SNAP_HINGE",
+                    "DESNAP_HINGE"
+                ],
+                "parameters": {
+                    "identity_separation_threshold": 0.35,
+                    "unit_scale": "SI",
+                    "gravity": [
+                        0,
+                        -9.81,
+                        0
+                    ]
+                }
+            },
+            "transition": {
+                "type": "deterministic",
+                "rules": [
+                    "VALIDATE checks required parts + quantities",
+                    "VALIDATE checks identity separation when similar chassis exist",
+                    "SNAP_HINGE merges scene subgraphs only if BOM valid"
+                ]
+            },
+            "score": {
+                "metrics": [
+                    "bom_pass_rate",
+                    "hinge_safe_snaps",
+                    "identity_separation_failures"
+                ]
+            },
+            "agentq_hooks": {
+                "explain": [
+                    "why_bom_failed",
+                    "what_part_is_missing",
+                    "where_safe_mutation_points_exist"
+                ],
+                "debug_views": [
+                    "bom_table",
+                    "constraint_report",
+                    "hinge_map"
+                ]
+            },
+            "exercises": [
+                "Remove wheel_tensor and observe token-release prohibition",
+                "Create two nearly identical rigs and force identity separation remediation",
+                "Add a new hinge and define its safety contract"
+            ]
+        }
+    ]
+}
