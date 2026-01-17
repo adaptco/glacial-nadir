@@ -1,0 +1,110 @@
+mixture_of_agents:
+  version: v1.0.0
+  namespace: kart_championship_moe_v1
+  description: >
+    A governed graph of Expert Agents operating over a Qube-based 3D phase space,
+    backed by Merkle-verified event logs and IPFS-stored policy ensembles.
+
+  core_ontology:
+    qube:
+      description: "Root eigenstate of the system (The Qube)"
+      state_vector_components:
+        - track_state (x_t_track)
+        - kart_states (x_t_karts)
+        - driver_states (x_t_drivers)
+        - environment_state (x_t_env)
+        - race_control_state (x_t_race_control)
+      properties:
+        - scalar_volume: "Total mass of state (energy, entropy, uncertainty)"
+        - voxelization: "Grid where each voxel holds occupancy, velocity field, grip coeff, local noise"
+
+  experts:
+    - name: RaceControllerAgent
+      role: global_control
+      description: "Global rules, safety car, penalties, timekeeping"
+      input: [qube_state, telemetry_summary]
+      output: [flags, penalties, safety_car_state]
+      routing_condition: "Always active, spikes on incidents"
+
+    - name: TrackDynamicsAgent
+      role: track_field
+      description: "Surface friction, weather, rubbering-in, grip evolution"
+      input: [weather_state, rubber_level, traffic_density]
+      output: [grip_map_3d]
+      routing_condition: "Heavy rain, track evolution events"
+
+    - name: KartPhysicsAgent
+      role: kart_dynamics
+      description: "Per-kart dynamics, tire model, engine, damage"
+      input: [kart_state, grip_map_3d]
+      output: [next_kart_state]
+      routing_condition: "High-speed straights, cornering (dominant)"
+
+    - name: DriverStyleAgent
+      role: driver_policy
+      multiplicity: N
+      description: "One per driver; encoding aggression, risk, line choice"
+      input: [kart_state, track_segment_embedding, forest_policy_hint]
+      output: [control_actions]
+      routing_condition: "Always active for specific kart"
+
+    - name: StrategyAgent
+      role: race_strategy
+      description: "Pit windows, tire choice, fuel, overcut/undercut"
+      input: [race_state, forecast, risk_profile]
+      output: [pit_calls, fuel_targets]
+      routing_condition: "Pit window approach, weather change"
+
+    - name: TelemetryAgent
+      role: logging
+      description: "Compresses state -> embeddings, logs to Merkle/IPFS"
+      input: [qube_state, agent_decisions]
+      output: [event_leaves, merkle_root]
+      routing_condition: "Per tick or significant event"
+
+    - name: StewardAgent
+      role: governance
+      description: "Incident detection, rule enforcement, replay-court hooks"
+      input: [event_stream, ruleset]
+      output: [incidents, penalties]
+      routing_condition: "Collision, rule violation suspicion"
+
+  control_systems:
+    phase_space_control:
+      fft: "Identify dominant frequencies (oscillations, tremor)"
+      bode_plot: "Magnitude + phase vs frequency for response analysis"
+      laplace_transform: "S-domain controller tuning, stability margins"
+    fractal_geometry:
+      concept: "Track as self-similar state space"
+      implementation: "Multi-resolution embeddings, corner families"
+
+  memory_and_governance:
+    merkle_tree:
+      artifact_type: race_event_log
+      storage: ipfs
+      root_cid_field: merkle_root_cid
+      leaf_structure:
+        - event_id
+        - tick
+        - kart_id
+        - type (overtake, collision, etc.)
+        - state_before
+        - state_after
+        - agent_decisions
+    random_forest:
+      artifact_type: policy_ensemble
+      storage: ipfs
+      cid_field: forest_cid
+      usage: "Policy prior for DriverStyleAgents"
+      structure: "Ensemble of weak experts (trees)"
+
+  routing:
+    type: gated_sparse
+    router_input: qube_embedding
+    gating_function: softmax
+    threshold: 0.1
+    logic: |
+      At each tick t:
+      1. Embed Qube state into latent z_t.
+      2. Compute gating weights g_i(z_t) for each Expert E_i.
+      3. Fire Experts where g_i(z_t) > threshold.
