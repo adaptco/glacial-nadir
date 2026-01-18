@@ -1,0 +1,324 @@
+# Digital Twin Configuration: Pocket Bunny R32 GT-R
+# ASIL-D Integrity Standard | 2026 Epoch | Zero-Drift Parity
+# This configuration anchors the physical R32 build to its digital representation
+
+metadata:
+  vehicle_id: "R32_POCKET_BUNNY_001"
+  build_date: "2026-01-17T15:56:43-05:00"
+  epoch: "2026"
+  integrity_standard: "ASIL-D"
+  hausdorff_tolerance: 0.045e-9  # 0.045 nanometers
+  merkle_chain_genesis: null  # Will be computed on first build
+
+# Physical Hardware Specifications
+physical_spec:
+  base_platform: "Suzuki Twin"
+  body_kit: "TRA Kyoto Pocket Bunny RCBS"
+  engine:
+    horsepower: 1064
+    configuration: "Twin-Turbo V6"
+    displacement_cc: 2600
+  
+  # Widebody Geometry (Critical for alignment validation)
+  geometry:
+    wheelbase_mm: 2615
+    front_track_mm: 1475
+    rear_track_mm: 1480
+    widebody_offset:
+      front_mm: 40  # +40mm per side
+      rear_mm: 60   # +60mm per side
+    total_width_mm: 1880
+    
+  # Suspension & Alignment Targets
+  suspension:
+    type: "Double Wishbone (Front & Rear)"
+    air_suspension: "Airmext Japan Electromagnetic"
+    
+    # TAS 2026 Alignment Standards
+    alignment_targets:
+      front_camber_deg: -3.0  # Range: -2.5 to -3.5
+      rear_camber_deg: -2.5
+      front_toe_deg: 0.0
+      rear_toe_deg: 0.05
+      caster_deg: 6.5
+    
+    # Zero-Drift Fitment Constraints
+    clearance_constraints:
+      min_tire_to_fender_mm: 5.0
+      max_tire_deflection_mm: 15.0
+      full_lock_clearance_mm: 8.0
+
+# Digital Twin Representation (4-Layer Alignment)
+digital_twin:
+  # Layer 1: Raw Telemetry Data
+  data_layer:
+    sampling_rate_hz: 100
+    imu_sensors:
+      - type: "Bosch BMI088"
+        location: "center_of_gravity"
+        axes: ["accel_x", "accel_y", "accel_z", "gyro_x", "gyro_y", "gyro_z"]
+    
+    gps_sensor:
+      type: "u-blox F9P RTK"
+      accuracy_cm: 2
+    
+    strain_gauges:
+      - location: "front_left_a_arm"
+      - location: "front_right_a_arm"
+      - location: "rear_left_a_arm"
+      - location: "rear_right_a_arm"
+  
+  # Layer 2: Physics Models (PINN Integration Point)
+  model_layer:
+    vehicle_dynamics:
+      model_type: "single_track_extended"
+      tire_model: "pacejka_magic_formula"
+      pacejka_coefficients:
+        B: 10.0   # Stiffness factor
+        C: 1.9    # Shape factor
+        D: 1.0    # Peak factor
+        E: -1.0   # Curvature factor
+      
+      # Vehicle parameters for PINN constraints
+      mass_kg: 1200
+      moment_of_inertia_kgm2: 2500
+      cg_height_mm: 450
+      front_weight_distribution: 0.60
+      
+      # Aerodynamics (Widebody)
+      aero:
+        drag_coefficient: 0.35
+        downforce_coefficient_front: 0.15
+        downforce_coefficient_rear: 0.25
+        frontal_area_m2: 2.1
+  
+  # Layer 3: Meta-Model (Schemas & Validation Rules)
+  metamodel_layer:
+    validation_rules:
+      # Hausdorff Drift Detection
+      - name: "hausdorff_drift_check"
+        metric: "hausdorff_distance"
+        threshold: 0.045e-9
+        action_on_violation: "hard_kill_sequence"
+      
+      # Idempotency Validation
+      - name: "wheel_rub_detection"
+        metric: "tire_fender_clearance"
+        min_threshold_mm: 5.0
+        action_on_violation: "alignment_audit_required"
+      
+      # Laminar Point Stability (High-G)
+      - name: "laminar_point_stability"
+        metric: "lateral_acceleration"
+        max_threshold_g: 1.8
+        stability_window_ms: 100
+        action_on_violation: "aero_revalidation"
+    
+    # Constraint Boundaries (S4 Gate)
+    admissibility_boundaries:
+      lateral_accel_g: [-2.0, 2.0]
+      longitudinal_accel_g: [-1.5, 1.5]
+      vertical_accel_g: [-1.0, 3.0]
+      yaw_rate_deg_s: [-180, 180]
+      slip_angle_deg: [-15, 15]
+  
+  # Layer 4: Ontology (Semantic Relationships)
+  ontology_layer:
+    relationships:
+      - source: "tire_temperature"
+        influences: "pacejka_coefficients"
+        transfer_function: "thermal_degradation_curve"
+      
+      - source: "suspension_deflection"
+        influences: "camber_angle"
+        transfer_function: "kinematic_geometry_model"
+      
+      - source: "aero_rake_angle"
+        influences: "downforce_coefficient"
+        transfer_function: "cfd_lookup_table"
+
+# PINN Arbitration Layer Configuration
+pinn_arbitration:
+  enabled: true
+  model_version: "v1.0.0"
+  
+  # Neural Network Architecture
+  architecture:
+    input_dim: 12  # [vx, vy, yaw_rate, ax, ay, steering, throttle, brake, slip_angle, wheel_speeds(4)]
+    hidden_layers: [64, 64, 32]
+    output_dim: 6  # [ax_pred, ay_pred, yaw_rate_pred, slip_angle_pred, vx_pred, vy_pred]
+    activation: "tanh"
+  
+  # Physics Loss Terms (Enforced Constraints)
+  physics_constraints:
+    # Newton's Second Law: F = ma
+    - name: "force_balance"
+      weight: 1.0
+      equation: "sum(forces) - mass * acceleration"
+      enabled: true
+    
+    # Tire Force Constraints (Pacejka)
+    - name: "tire_friction_circle"
+      weight: 0.8
+      equation: "sqrt(Fx^2 + Fy^2) <= mu * Fz"
+      enabled: true
+    
+    # Yaw Moment Balance
+    - name: "yaw_moment_balance"
+      weight: 0.9
+      equation: "sum(moments) - Izz * yaw_acceleration"
+      enabled: true
+    
+    # No-Slip Condition (Kinematic)
+    - name: "kinematic_consistency"
+      weight: 0.7
+      equation: "v_rear = v_front * cos(slip_angle)"
+      enabled: true
+  
+  # Training Configuration
+  training:
+    optimizer: "adam"
+    learning_rate: 0.001
+    batch_size: 256
+    epochs: 1000
+    physics_loss_weight: 0.6
+    data_loss_weight: 0.4
+  
+  # State Estimation Performance
+  performance_targets:
+    latency_ms: 1.2  # Target: 1.2ms inference time
+    update_frequency_hz: 100
+    prediction_horizon_s: 0.5
+    
+    # Accuracy Thresholds
+    max_position_error_m: 0.1
+    max_velocity_error_ms: 0.5
+    max_yaw_error_deg: 2.0
+
+# Surgical Build Protocol (Irreversible State Mutations)
+surgical_protocol:
+  # Critical: These operations CANNOT be rolled back
+  irreversible_operations:
+    - operation: "body_panel_cutting"
+      status: "pending"  # pending | in_progress | complete
+      checksum: null
+      timestamp: null
+      auditor_signature: null
+    
+    - operation: "inner_fender_sealing"
+      status: "pending"
+      checksum: null
+      timestamp: null
+      auditor_signature: null
+    
+    - operation: "roll_cage_welding"
+      status: "pending"
+      checksum: null
+      timestamp: null
+      auditor_signature: null
+  
+  # Pre-flight Checks (Must pass before surgical ops)
+  preflight_checks:
+    - check: "3d_scan_verification"
+      required_accuracy_mm: 0.5
+      status: "pending"
+    
+    - check: "fitment_simulation"
+      required_clearance_mm: 5.0
+      status: "pending"
+    
+    - check: "structural_integrity_fem"
+      min_safety_factor: 2.0
+      status: "pending"
+
+# Telemetry & Logging
+telemetry:
+  logging_enabled: true
+  log_directory: "./runs/r32_pocket_bunny"
+  
+  streams:
+    - name: "high_fidelity_telemetry"
+      format: "csv"
+      buffering: false
+      fields:
+        - timestamp
+        - tick
+        - position_xyz
+        - velocity_xyz
+        - acceleration_xyz
+        - yaw_pitch_roll
+        - wheel_speeds
+        - suspension_travel
+        - tire_temperatures
+        - brake_temperatures
+    
+    - name: "pinn_validation"
+      format: "json"
+      buffering: true
+      fields:
+        - timestamp
+        - predicted_state
+        - actual_state
+        - physics_loss
+        - data_loss
+        - total_loss
+        - hausdorff_drift
+  
+  # Integration with existing Merkle Chain
+  merkle_integration:
+    enabled: true
+    checkpoint_frequency_ticks: 100
+    genesis_block: null
+
+# Sonic Green Hill Kinetic Loop (Virtual Stressing)
+virtual_stressing:
+  scenarios:
+    - name: "sonic_green_hill_loop"
+      description: "High-G loop transition at Nürburgring Karussell"
+      max_lateral_g: 1.8
+      max_vertical_g: 2.5
+      duration_s: 3.5
+      validation_required: true
+    
+    - name: "flugplatz_jump"
+      description: "High-speed compression event"
+      max_vertical_g: 3.0
+      suspension_travel_mm: 100
+      validation_required: true
+    
+    - name: "full_throttle_sweep"
+      description: "Maximum steering lock at speed"
+      steering_angle_deg: 45
+      speed_kmh: 80
+      tire_clearance_check: true
+  
+  # Success Criteria
+  validation_criteria:
+    - metric: "hausdorff_drift"
+      max_value: 0.045e-9
+      critical: true
+    
+    - metric: "tire_fender_contact"
+      max_value: 0
+      critical: true
+    
+    - metric: "suspension_bottoming"
+      max_value: 0
+      critical: false
+
+# Compliance & Auditability
+compliance:
+  standards:
+    - "ISO 26262 (ASIL-D)"
+    - "TAS 2026 Widebody Alignment Standard"
+    - "FIA Homologation Rules (Modified)"
+  
+  audit_trail:
+    enabled: true
+    immutable_ledger: true
+    signing_authority: "digital_twin_validator"
+    
+  export_formats:
+    - "VEC_2.0.0"  # Vehicle Electric Container
+    - "KBL_2.4"    # Wiring Harness
+    - "STEP_AP242" # 3D CAD Data Exchange

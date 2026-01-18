@@ -1,0 +1,311 @@
+:root {
+    /* British Racing Green + Blueprint Theme */
+    --color-bg-primary: #0a0e0d;
+    --color-bg-secondary: #111716;
+    --color-bg-panel: #162320;
+    --color-accent-green: #00563f;
+    --color-accent-bright: #00d9a3;
+    --color-accent-cyan: #00ffcc;
+    --color-grid-line: #1a3d35;
+    --color-text-primary: #e0f4ee;
+    --color-text-secondary: #7da899;
+    --color-text-dim: #4a6b5f;
+    --color-warning: #ffd700;
+    --color-error: #ff4444;
+    --color-success: #00ff88;
+    
+    --font-primary: 'Segoe UI', 'Roboto', sans-serif;
+    --font-mono: 'Consolas', 'Courier New', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-primary);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    overflow: hidden;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-grid-line);
+    border-radius: 4px;
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--color-accent-bright);
+    text-transform: uppercase;
+}
+
+.subtitle {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-dim);
+    margin-top: 0.25rem;
+    letter-spacing: 0.05em;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-grid-line);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-text-dim);
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.connected .status-dot {
+    background: var(--color-success);
+}
+
+.status-indicator.error .status-dot {
+    background: var(--color-error);
+    animation: none;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 1rem;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Panels */
+.panel {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-grid-line);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.qube-panel {
+    grid-column: 1 / 5;
+    grid-row: 1 / 4;
+}
+
+.experts-panel {
+    grid-column: 5 / 13;
+    grid-row: 1 / 4;
+}
+
+.telemetry-panel {
+    grid-column: 1 / 8;
+    grid-row: 4 / 7;
+}
+
+.log-panel {
+    grid-column: 8 / 13;
+    grid-row: 4 / 7;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--color-bg-panel);
+    border-bottom: 1px solid var(--color-grid-line);
+}
+
+.panel-header h2 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--color-accent-bright);
+}
+
+.panel-icon {
+    font-size: 1.2rem;
+    color: var(--color-accent-cyan);
+}
+
+.panel-body {
+    flex: 1;
+    padding: 1.5rem;
+    overflow: auto;
+}
+
+/* Qube Metrics */
+.metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-grid-line);
+}
+
+.metric-row:last-child {
+    border-bottom: none;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--color-text-dim);
+}
+
+.metric-value {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-accent-bright);
+}
+
+.merkle-hash {
+    font-size: 0.7rem;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Expert Grid */
+.expert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.expert-card {
+    padding: 1rem;
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-grid-line);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.expert-card.active {
+    border-color: var(--color-accent-bright);
+    background: linear-gradient(135deg, var(--color-bg-panel) 0%, var(--color-accent-green) 100%);
+    box-shadow: 0 0 20px rgba(0, 217, 163, 0.3);
+}
+
+.expert-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.expert-status {
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-dim);
+}
+
+.expert-card.active .expert-status {
+    color: var(--color-success);
+}
+
+/* Telemetry Canvas */
+#telemetry-canvas {
+    width: 100%;
+    height: 100%;
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-grid-line);
+    border-radius: 4px;
+}
+
+/* Event Log */
+.log-container {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+}
+
+.log-entry {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-grid-line);
+    display: flex;
+    gap: 1rem;
+}
+
+.log-time {
+    color: var(--color-accent-cyan);
+    min-width: 80px;
+}
+
+.log-message {
+    color: var(--color-text-secondary);
+    flex: 1;
+}
+
+/* Footer */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-grid-line);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-text-dim);
+}
+
+.footer-item {
+    letter-spacing: 0.05em;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg-panel);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-grid-line);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent-green);
+}

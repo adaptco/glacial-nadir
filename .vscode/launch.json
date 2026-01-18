@@ -2,12 +2,60 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch via NPM",
+            "request": "launch",
+            "runtimeArgs": [
+                "run-script",
+                "debug"
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
+            "name": "Attach to Edge",
+            "port": 9222,
+            "request": "attach",
+            "type": "msedge",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/app.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
             "type": "java",
             "name": "Attach",
             "request": "attach",
             "hostName": "localhost",
             "port": "<debug port of the debuggee>"
         },
+        {
+            "epoch": "3.1",
+            "timestamp": "2026-01-17T20:33:46.551Z",
+            "audit_ref": "RPT. 01.12.C",
+            "baseline": {
+                "resonance": 82.2,
+                "enthalpy": 104.5
+            },
+            "history_size": 20,
+            "last_tick": {
+                "tick": 20,
+                "db": 82.18,
+                "h": 104.49,
+                "p": 1.01,
+                "t": 24.22,
+                "loss": 0.003294437175539915,
+                "reward": 0.8832392028244905
+            }
+        }
         {
             "type": "node",
             "request": "attach",

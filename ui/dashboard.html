@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Operator HUD | Agentic Kernel Command Center</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>MASTER OPERATOR</h1>
+                <span class="subtitle">Agentic Kernel Command Center</span>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator" id="connection-status">
+                    <span class="status-dot"></span>
+                    <span>CONNECTING</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="dashboard-grid">
+            <!-- Qube State Panel -->
+            <div class="panel qube-panel">
+                <div class="panel-header">
+                    <h2>QUBE STATE</h2>
+                    <span class="panel-icon">◉</span>
+                </div>
+                <div class="panel-body">
+                    <div class="metric-row">
+                        <span class="metric-label">TICK</span>
+                        <span class="metric-value" id="tick-counter">0</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">STATUS</span>
+                        <span class="metric-value" id="kernel-status">IDLE</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">EVENTS</span>
+                        <span class="metric-value" id="event-count">0</span>
+                    </div>
+                    <div class="metric-row merkle-row">
+                        <span class="metric-label">MERKLE ROOT</span>
+                        <span class="metric-value merkle-hash" id="merkle-root">NONE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expert Activation Panel -->
+            <div class="panel experts-panel">
+                <div class="panel-header">
+                    <h2>EXPERT NETWORK</h2>
+                    <span class="panel-icon">⚡</span>
+                </div>
+                <div class="panel-body">
+                    <div class="expert-grid" id="expert-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Telemetry Panel -->
+            <div class="panel telemetry-panel">
+                <div class="panel-header">
+                    <h2>TELEMETRY</h2>
+                    <span class="panel-icon">◈</span>
+                </div>
+                <div class="panel-body">
+                    <canvas id="telemetry-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Event Log Panel -->
+            <div class="panel log-panel">
+                <div class="panel-header">
+                    <h2>EVENT LOG</h2>
+                    <span class="panel-icon">▤</span>
+                </div>
+                <div class="panel-body">
+                    <div class="log-container" id="event-log">
+                        <div class="log-entry">
+                            <span class="log-time">00:00:00</span>
+                            <span class="log-message">System initialized. Awaiting first tick...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-item">
+                <span>KERNEL v1.0.0</span>
+            </div>
+            <div class="footer-item">
+                <span>N3 AUDIT ENABLED</span>
+            </div>
+            <div class="footer-item">
+                <span id="local-time">--:--:--</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
