@@ -7,6 +7,7 @@ import jcs_utils
 @dataclass
 class CanonicalManifest:
     node_id: str
+    genesis_root: str
     world_state_hash: str
     hamiltonian_seed: int
 
@@ -24,13 +25,14 @@ class FossilReceipt:
     provenance: Provenance
 
     @classmethod
-    def create(cls, epoch_id: str, node_id: str, world_state_hash: str, seed: int, safety_path: str = "FAIL_CLOSED|LEDGER_FIRST"):
+    def create(cls, epoch_id: str, node_id: str, world_state_hash: str, seed: int, genesis_root: str, safety_path: str = "FAIL_CLOSED|LEDGER_FIRST"):
         """
         Factory method to create a sealed receipt.
         Calculates the audit_seal based on the canonical hash of the manifest + seed.
         """
         manifest = CanonicalManifest(
             node_id=node_id,
+            genesis_root=genesis_root,
             world_state_hash=world_state_hash,
             hamiltonian_seed=seed
         )
