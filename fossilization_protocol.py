@@ -61,3 +61,7 @@ def execute_fossilization(input_data: Dict[str, Any]) -> Dict[str, Any]:
 def zapier_entrypoint(input_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Zapier-compatible entry point that delegates to the fossilization routine."""
     return execute_fossilization(input_data or {})
+
+
+if "input_data" in globals():
+    output = execute_fossilization(globals()["input_data"])
