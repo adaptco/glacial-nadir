@@ -1,11 +1,11 @@
 import hashlib
+import json
 import yaml
-import jcs_utils
 
 
 def canonicalize_jcs(data: dict) -> str:
     """Implements JSON Canonicalization Scheme (RFC 8785) for YAML objects."""
-    return jcs_utils.jcs_serialize(data).decode("utf-8")
+    return json.dumps(data, sort_keys=True, separators=(",", ":"))
 
 
 def verify_fossil(path_to_yaml: str) -> bool:
@@ -14,7 +14,7 @@ def verify_fossil(path_to_yaml: str) -> bool:
         artifact = yaml.safe_load(file_handle)
 
     provided_digest = artifact.pop("digest")
-    computed_digest = hashlib.sha256(jcs_utils.jcs_serialize(artifact)).hexdigest()
+    computed_digest = hashlib.sha256(canonicalize_jcs(artifact).encode()).hexdigest()
 
     return provided_digest == computed_digest
 
