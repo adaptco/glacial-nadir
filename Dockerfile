@@ -1,20 +1,6 @@
-# Use an official Python runtime as a parent image
 FROM python:3.11-slim
-
-# Set the working directory in the container
 WORKDIR /app
-
-# Copy the requirements file into the container at /app
-COPY requirements.txt ./
-
-# Install any needed packages specified in requirements.txt
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application code
-COPY kernel.py schemas.py agent_charter.yaml ./
-
-# Expose the socket port
-EXPOSE 65432
-
-# Run the kernel when the container launches
-CMD ["python", "kernel.py"]
+COPY . .
+CMD ["python", "main_agent.py"]
